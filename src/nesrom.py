@@ -1,4 +1,30 @@
 #! /usr/bin/python3
+"""NES ROM
+
+Copyright (c) 2016 Alex Dale
+
+This program is licensed under the MIT License (MIT). Please review the
+accompanying LICENSE file for details.
+
+This program consists of a set of useful tools for handling NES ROM files for
+emulated NES hardware.  This tool is intended to make it easier for classic
+NES game fans to produce and convert ROM files for various purposes.
+
+This tool does not contain any copyrighted information
+about the ROM files them self.  All design details have been retrieved from
+publicly available information.
+
+Source:
+    http://nesdev.com/NESDoc.pdf
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 
 import argparse
 import codecs
@@ -8,6 +34,25 @@ import random
 import sys
 
 def binaryToHeader(istream, ostream, ofilename, varname):
+    """Binary (ROM) to C Header
+
+    Writes the binary content of the input file to the output header file as
+    a single unsigned character array.  The produced header file is ANSI C89
+    onwards complient.
+
+    Parameters:
+        istream     - Input file stream containing the binary information of a
+                      ROM.
+        ostream     - Output file stream to be produced into a valid C header
+                      file.
+        ofilename   - The name of the C header file, used to produce the header
+                      guard macro.
+        varname     - The name of the variable.  Must be a valid C identifier.
+
+    Returns:
+        None
+    """
+
     if istream is None or ostream is None:
         raise ValueError("Need input and output streams")
 
@@ -19,28 +64,40 @@ def binaryToHeader(istream, ostream, ofilename, varname):
 
     macro = basename(ofilename.split(".")[0]).upper().replace("-", "_")
 
+    # Start header guard
     printOut("#ifndef _{0}_\n".format(macro))
     printOut("#define _{0}_\n\n".format(macro))
-    printOut("unsigned char {0}[] = {{".format(varname))
 
-    byte = readByte()
     count = 0
     toHex = codecs.getencoder('hex')
-
+    printOut("unsigned char {0}[] = {{".format(varname))
+    byte = readByte()
     while byte != b"":
         if count != 0:
             printOut(", ")
-        if count % 10 == 0:
-            printOut("\n    ")
+        if count % 10 == 0:     # Keeps the line length less than 80 characters
+            printOut("\n    ")  # Yes, spaces for intend
         printOut("0x{0}".format(toHex(byte)[0].decode()))
         count += 1
         byte = readByte()
 
     printOut("};\n\n")
 
+    # End header guard
     printOut("#endif\n\n")
 
 def generateBinary(ostream, nbytes):
+    """Generate Binary with Random Bytes
+
+    Generates a binary file with the 8*floor(nbytes/8) bytes of data to the
+    specified file stream.
+
+    Parameters:
+        ostream     - Output file stream that the random binary information will
+                      be written to.
+        nbytes      - The maximum number of bytes to run.  Exact number of bytes
+                      is closest multiple of 8 less than or equal to nbytes.
+    """
     for _ in range(nbytes // 8):
         ostream.write(os.urandom(8))
 
@@ -90,4 +147,5 @@ def main(*argv):
     return 0
 
 if __name__ == "__main__":
+    # Program starts here.  Strips the first argument off
     sys.exit(main(*sys.argv[1:]))
