@@ -1,5 +1,5 @@
 #! /usr/bin/python3
-"""NES ROM
+"""NES ROM - Utilities
 
 Copyright (c) 2016 Alex Dale
 
@@ -102,19 +102,58 @@ def generateBinary(ostream, nbytes):
         ostream.write(os.urandom(8))
 
 def parseArguments(*argv):
-    parser = argparse.ArgumentParser(description="Utility functions for processing Nintendo Entertainment System game ROM files")
-    cmdParsers = parser.add_subparsers(help="Selection for program function", dest="command")
+    """Parse Arguments
 
-    toHeaderParser = cmdParsers.add_parser("header", help="Generate a C header from a binary")
-    toHeaderParser.add_argument("-o", "--output", help="Output file name", action="store", dest="ofilename", metavar="OUTPUT")
-    toHeaderParser.add_argument("--var", help="Output character array name", action="store", dest="varname", metavar="VAR_NAME")
-    toHeaderParser.add_argument(metavar="INPUT", help="Input binary file to be converted", dest="ifilename")
+    Parses the given argument string set to produce the options available for
+    the program.  Most incorrect arguments will result in a program failure that
+    will produce a help message.
 
-    randomBinaryParser = cmdParsers.add_parser("rand", help="Generate a random binary file")
-    randomBinaryParser.add_argument("-o", "--output", help="Output file name", action="store", dest="ofilename")
-    randomBinaryParser.add_argument("-s", "--size", help="size of the binary file to be created in kB",
-                                    action="store", type=int, choices=[32, 64], dest="binsize")
+    This program consists of several small programs, so the arguments are broken
+    down into sub-commands from the main program.  Each sub-command has a small
+    set of arguments.
 
+    Parameters:
+        (variable)  - The arguments to this function is variable non-key-word
+                      arguments.
+
+    Example:
+        parseArguments("header", "-o", "include/sampleHeader.h" "--var",
+                       "sample_rom", "sample/sample.bin")
+
+    Returns:
+        An argument object with attributes for each of the parsed arguments.
+    """
+
+    # Primary parser for the whole program
+    parser = argparse.ArgumentParser(
+        description="Utility functions for processing Nintendo Entertainment "
+                    "System game ROM files")
+    cmdParsers = parser.add_subparsers(help="Selection for program function",
+                                       dest="command")
+
+    # Binary to Header Command
+    toHeaderParser = cmdParsers.add_parser("header",
+                                           help="Generate a C header from a "
+                                                "binary")
+    toHeaderParser.add_argument("-o", "--output", help="Output file name",
+                                action="store", dest="ofilename",
+                                metavar="OUTPUT")
+    toHeaderParser.add_argument("--var", help="Output character array name",
+                                action="store", dest="varname",
+                                metavar="VAR_NAME")
+    toHeaderParser.add_argument(metavar="INPUT",
+                                help="Input binary file to be converted",
+                                dest="ifilename")
+
+    randomBinaryParser = cmdParsers.add_parser("rand",
+                                               help="Generate a random binary "
+                                                    "file")
+    randomBinaryParser.add_argument("-o", "--output", help="Output file name",
+                                    action="store", dest="ofilename")
+    randomBinaryParser.add_argument("-s", "--size",
+                                    help="size of the binary file in kB",
+                                    action="store", type=int, choices=[32, 64],
+                                    dest="binsize")
     return parser.parse_args(args=argv)
 
 def main(*argv):
@@ -123,11 +162,13 @@ def main(*argv):
     if options.command == "header":
         istream = open(options.ifilename, mode="rb")
         if istream is None:
-            print("Failed to open input file {0}".format(options.ifilename), file=sys.stderr)
+            print("Failed to open input file {0}".format(options.ifilename),
+                  file=sys.stderr)
             return 1
         ostream = open(options.ofilename, mode="w+")
         if ostream is None:
-            print("Failed to open output file {0}".format(options.ofilename), file=sys.stderr)
+            print("Failed to open output file {0}".format(options.ofilename),
+                  file=sys.stderr)
             istream.close()
             return 1
         binaryToHeader(istream, ostream, options.ifilename, options.varname)
@@ -138,7 +179,8 @@ def main(*argv):
     if options.command == "rand":
         ostream = open(options.ofilename, mode="w+b")
         if ostream is None:
-            print("Failed to open output file {0}".format(options.ofilename), file=sys.stderr)
+            print("Failed to open output file {0}".format(options.ofilename),
+                  file=sys.stderr)
         nbytes = options.binsize * 1024
         generateBinary(ostream, nbytes)
         ostream.close()
