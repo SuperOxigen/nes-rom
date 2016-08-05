@@ -3,3 +3,6 @@ bin/*
 *.bin
 sample/*
 include/*
+*.gch
+*.o
+*.pyc
