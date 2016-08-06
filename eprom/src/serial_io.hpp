@@ -5,17 +5,21 @@ typedef unsigned int pin_t;
 
 class SerialIO
 {
-    enum Pin {
+    enum Pin
+    {
         SERIAL,
         SERIAL_CLK,
         SERIAL_CLR,
         PARALLEL_CLK,
         OUTPUT_ENABLED
     };
-    enum Mode : bool {
+
+    enum Mode : bool
+    {
         ACTIVE_HIGH = false,
         ACTIVE_LOW = true
     };
+
     pin_t   _ser,           /* Serial Out */
             _ser_clk,       /* Serial Clock */
             _ser_clr,       /* Serial Clear */
