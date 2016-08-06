@@ -6,17 +6,17 @@
 #define PULSE_DELAY 3
 
 SerialIO::SerialIO(pin_t ser, pin_t ser_clk, pin_t ser_clr, pin_t par_clk):
-    _ser(ser), _ser_clk(ser_clk), _ser_clr(ser_clr), _par_clk(par_clk),
+    _ser(ser), _ser_clk(ser_clk), _ser_clr(ser_clr), _par_clk(par_clk), _out_en(0),
     _ser_actl(false), _ser_clk_actl(false), _ser_clr_actl(false), _par_clk_actl(false),
-    _out_en(0), _out_en_actl(false), _out_en_sprtd(false)
+    _out_en_actl(false), _out_en_sprtd(false)
 {
     this->init_pins();
 }
 
 SerialIO::SerialIO(pin_t ser, pin_t ser_clk, pin_t ser_clr, pin_t par_clk, pin_t out_en):
-    _ser(ser), _ser_clk(ser_clk), _ser_clr(ser_clr), _par_clk(par_clk),
+    _ser(ser), _ser_clk(ser_clk), _ser_clr(ser_clr), _par_clk(par_clk), _out_en(out_en),
     _ser_actl(false), _ser_clk_actl(false), _ser_clr_actl(false), _par_clk_actl(false),
-    _out_en(out_en), _out_en_actl(false), _out_en_sprtd(true)
+    _out_en_actl(false), _out_en_sprtd(true)
 {
     this->init_pins();
 }
@@ -28,7 +28,7 @@ void SerialIO::init_pins()
     pinMode(this->_ser_clr, OUTPUT);
     pinMode(this->_par_clk, OUTPUT);
 
-    this->write_pin(SERIAL, LOW);
+    this->write_pin(SERIAL_IN, LOW);
     this->write_pin(SERIAL_CLK, LOW);
     this->write_pin(SERIAL_CLR, LOW);
     this->write_pin(PARALLEL_CLK, LOW);
@@ -42,7 +42,7 @@ void SerialIO::init_pins()
     this->clear();
 }
 
-void SerialIO::write_pin(Pin pin, int mode)
+void SerialIO::write_pin(Pin pin, int state)
 {
     decltype(this->_ser)        pin_no;
     decltype(this->_ser_actl)   actl;
@@ -51,7 +51,7 @@ void SerialIO::write_pin(Pin pin, int mode)
 
     switch (pin)
     {
-        case SERIAL:
+        case SERIAL_IN:
             pin_no = this->_ser;
             actl = this->_ser_actl;
             break;
@@ -66,7 +66,7 @@ void SerialIO::write_pin(Pin pin, int mode)
         case PARALLEL_CLK:
             pin_no = this->_par_clk;
             actl = this->_par_clk_actl;
-            break
+            break;
         case OUTPUT_ENABLED:
             pin_no = this->_out_en;
             actl = this->_out_en_actl;
@@ -77,10 +77,10 @@ void SerialIO::write_pin(Pin pin, int mode)
 
     if (actl)
     {
-        mode = (mode == HIGH ? LOW : HIGH);
+        state = (state == HIGH ? LOW : HIGH);
     }
 
-    digitalWrite(pin_no, mode);
+    digitalWrite(pin_no, state);
 }
 
 void SerialIO::write_byte(unsigned char byte)
@@ -98,11 +98,11 @@ void SerialIO::bit_load(unsigned int bit)
 {
     if (bit)
     {
-        this->write_pin(SERIAL, HIGH);
+        this->write_pin(SERIAL_IN, HIGH);
     }
     else
     {
-        this->write_pin(SERIAL, LOW);
+        this->write_pin(SERIAL_IN, LOW);
     }
     this->clk();
 }

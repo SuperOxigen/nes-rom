@@ -7,7 +7,7 @@ class SerialIO
 {
     enum Pin
     {
-        SERIAL,
+        SERIAL_IN,
         SERIAL_CLK,
         SERIAL_CLR,
         PARALLEL_CLK,

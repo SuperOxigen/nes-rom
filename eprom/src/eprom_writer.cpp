@@ -1,4 +1,5 @@
 #include "eprom_writer.hpp"
+#include <Arduino.h>
 #include <string.h>
 
 /*
@@ -27,8 +28,7 @@ enum class ROM_POWER : unsigned char
 {
     NORMAL  = 0x00,
     PROGRAM = 0x01,
-    MASK    = 0x01,
-    NMASK   = 0xFE
+    MASK    = 0x01
 };
 
 inline static unsigned char r2c(ROM_POWER power)
@@ -38,11 +38,10 @@ inline static unsigned char r2c(ROM_POWER power)
 
 enum class ROM_ENABLE : unsigned char
 {
-    STANDBY = 0x00,
+    STANDBY = 0x08,
     READ    = 0x02,
     WRITE   = 0x06,
-    MASK    = 0x06,
-    NMASK   = 0xFB
+    MASK    = 0x0E
 };
 
 inline static unsigned char r2c(ROM_ENABLE enable)
@@ -50,9 +49,23 @@ inline static unsigned char r2c(ROM_ENABLE enable)
     return static_cast<unsigned char>(enable);
 }
 
-EpromWriter::EpromWriter(SerialIO & serialIO):
-    _serial(serialIO), _addr(0), _data(0), _ctrl(0), _state(LOW_POWER_MODE)
+EpromWriter::EpromWriter(SerialIO * serialIO, pin_t err_one, pin_t err_two):
+    __serial{0,0,0,0}, _serial(serialIO), _err_one(err_one), _err_two(err_two),
+    _addr(0), _data(0), _ctrl(0), _state(LOW_POWER_MODE)
 {
+    pinMode(this->_err_one, INPUT);
+    pinMode(this->_err_two, INPUT);
+    this->set_mode(this->_state);
+}
+
+EpromWriter::EpromWriter(pin_t ser, pin_t ser_clk,
+                         pin_t ser_clr, pin_t par_clk,
+                         pin_t err_one, pin_t err_two):
+    __serial(ser, ser_clk, ser_clr, par_clk), _serial(&__serial),
+    _err_one(err_one), _err_two(err_two)
+{
+    pinMode(this->_err_one, INPUT);
+    pinMode(this->_err_two, INPUT);
     this->set_mode(this->_state);
 }
 
@@ -112,5 +125,10 @@ void EpromWriter::commit()
 {
     sequence_t sequence;
     this->to_byte_squence(sequence);
-    this->_serial.write_load(sequence, sizeof(sequence));
+    this->_serial->write_load(sequence, sizeof(sequence));
+}
+
+bool EpromWriter::check_error() const
+{
+    return digitalRead(this->_err_one) | digitalRead(this->_err_two);
 }
