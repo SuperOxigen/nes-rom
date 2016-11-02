@@ -5,18 +5,41 @@
 #define MSB 0x80
 #define PULSE_DELAY 3
 
-SerialIO::SerialIO(pin_t ser, pin_t ser_clk, pin_t ser_clr, pin_t par_clk):
-    _ser(ser), _ser_clk(ser_clk), _ser_clr(ser_clr), _par_clk(par_clk), _out_en(0),
-    _ser_actl(false), _ser_clk_actl(false), _ser_clr_actl(false), _par_clk_actl(false),
-    _out_en_actl(false), _out_en_sprtd(false)
+SerialIO::SerialIO(pin_t ser,
+                   pin_t ser_clk,
+                   pin_t ser_clr,
+                   pin_t par_clk):
+    _ser(ser),
+    _ser_clk(ser_clk),
+    _ser_clr(ser_clr),
+    _par_clk(par_clk),
+    _out_en(0),
+    _ser_actl(false),
+    _ser_clk_actl(false),
+    _ser_clr_actl(false),
+    _par_clk_actl(false),
+    _out_en_actl(false),
+    _out_en_sprtd(false)
 {
     this->init_pins();
 }
 
-SerialIO::SerialIO(pin_t ser, pin_t ser_clk, pin_t ser_clr, pin_t par_clk, pin_t out_en):
-    _ser(ser), _ser_clk(ser_clk), _ser_clr(ser_clr), _par_clk(par_clk), _out_en(out_en),
-    _ser_actl(false), _ser_clk_actl(false), _ser_clr_actl(false), _par_clk_actl(false),
-    _out_en_actl(false), _out_en_sprtd(true)
+SerialIO::SerialIO(pin_t ser,
+                   pin_t ser_clk,
+                   pin_t ser_clr,
+                   pin_t par_clk,
+                   pin_t out_en):
+    _ser(ser),
+    _ser_clk(ser_clk),
+    _ser_clr(ser_clr),
+    _par_clk(par_clk),
+    _out_en(out_en),
+    _ser_actl(false),
+    _ser_clk_actl(false),
+    _ser_clr_actl(false),
+    _par_clk_actl(false),
+    _out_en_actl(false),
+    _out_en_sprtd(true)
 {
     this->init_pins();
 }

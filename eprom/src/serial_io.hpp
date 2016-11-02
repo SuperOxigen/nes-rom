@@ -1,7 +1,7 @@
 #ifndef _SERIAL_IO_H_
 #define _SERIAL_IO_H_
 
-typedef unsigned int pin_t;
+#include "utils.h"
 
 class SerialIO
 {
